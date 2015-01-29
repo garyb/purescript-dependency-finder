@@ -117,11 +117,13 @@ p.then(function (json) {
 .then(function (bowerFiles) {
   var edges = _.flatten(bowerFiles.map(function (bf) {
     var name = bf.name;
-    var deps = bf.json.dependencies;
-    if (deps == null) return [];
+    var deps = bf.json.dependencies || {};
+    var devDeps = bf.json.devDependencies || {};
     return Object.keys(deps).map(function (k) {
       return { from: bf.name, to: k };
-    });
+    }).concat(Object.keys(devDeps).map(function (k) {
+      return { from: bf.name, to: k };
+    }));
   }));
   fs.writeFileSync("graph.json", JSON.stringify(edges, null, 4));
   if (process.argv[2]) {
