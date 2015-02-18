@@ -5,7 +5,8 @@
   "dependencies": {
     "bluebird": "^2.3.11",
     "lodash": "^2.4.1",
-    "request": "^2.51.0"
+    "request": "^2.51.0",
+    "toposort": "^0.2.10"
   },
   "license": "MIT"
 }

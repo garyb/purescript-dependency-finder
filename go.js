@@ -2,6 +2,7 @@ var _ = require("lodash");
 var Bluebird = require("bluebird");
 var request = Bluebird.promisify(require("request"));
 var fs = require("fs");
+var toposort = require("toposort");
 
 var purescriptRepos = "https://api.github.com/orgs/purescript/repos";
 var purescriptForks = "https://api.github.com/orgs/purescript/repos?type=forks";
@@ -132,7 +133,7 @@ p.then(function (json) {
     });
     var deps = findDependencies(process.argv[2], edges);
     deps.sort();
-    deps.forEach(function (dep) {
+    var xs = _.flatten(deps.map(function (dep) {
       var related = _.unique(edges.filter(function (edge) {
         return edge.from === dep;
       }).map(function (edge) {
@@ -140,13 +141,11 @@ p.then(function (json) {
       }).filter(function (related) {
         return deps.indexOf(related) != -1;
       }));
-      related.sort();
-      if (related.length) {
-        console.log(dep + "\n    " + related.join("\n    "));
-      } else {
-        console.log(dep);
-      }
-    });
+      return related.map(function (rel) {
+        return [rel, dep];
+      });
+    }), true);
+    console.log(toposort(xs).join("\n"));
   }
 })
 .catch(function (err) {
